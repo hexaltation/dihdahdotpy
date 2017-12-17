@@ -1,4 +1,10 @@
+#!/usr/bin/env python3
+
 # Test for morse code Generator/TX
+# By hexaltation
+# Version 0.0.2
+# GPL V3
+# December 2017
 
 import pyaudio
 import re
@@ -133,10 +139,10 @@ def generate_morse_msg(msg, wpm=6):
     return create_tx(durations_n_volumes)
 
 
-def generate_url(list_of_words):
-    output = 'http://www.wikipedia.org/wiki/'
+def generate_url(list_of_words, language):
+    output = 'https://'+language+'.wikipedia.org/wiki/'
     for idx, word in enumerate(list_of_words):
-        output += word.replace(' ', '_')
+        output += word.replace(' ', '_').lower()
         if len(list_of_words) > 1 and idx < (len(list_of_words)-1):
             output += '_'
     return output
@@ -145,8 +151,8 @@ def generate_url(list_of_words):
 def get_first_paragraph(raw_page):
     utf8_page = raw_page.decode('utf-8')
     paragraphs = re.search('<p>(.*?)<\/p>', utf8_page)
-    first_paragraph = paragraphs.group(0)
-    clean_first_p = re.sub('<.*?>', '', first_paragraph)
+    first_p = paragraphs.group(0)
+    clean_first_p = re.sub('<.*?>', '', first_p)
     return clean_first_p
 
 parser = argparse.ArgumentParser(prog='dihdahdotpy', description='A digital Morse code '
@@ -156,13 +162,20 @@ parser.add_argument('-m', dest='msg', type=str, nargs='?', help='The message to 
                                                                 'code')
 parser.add_argument('-f', dest='filename', type=str, nargs=1, help='The message to '
                                                                    'translate '
-                                                                   'is stored in a file')
+                                                                   'is stored in a text file')
 parser.add_argument('-w', dest='wiki', type=str, nargs='*', help='Read the definition from '
                                                                  'wikipedia.org of a given '
                                                                  'word')
+parser.add_argument('-lang', dest='lang', type=str, nargs='?', help='Choose the language for '
+                                                                    'wikipedia.\nEx. for '
+                                                                    'french : "fr". '
+                                                                    'Default language : "en"')
 
 args = parser.parse_args()
-print(args)
+lang = 'en'
+
+if args.lang is not None:
+    lang = args.lang.lower()
 if args.msg is not None:
     generate_morse_msg(args.msg)
 elif args.filename is not None:
@@ -170,7 +183,7 @@ elif args.filename is not None:
         msg_from_file = f.read()
         generate_morse_msg(msg_from_file)
 elif args.wiki is not None:
-    url = generate_url(args.wiki)
+    url = generate_url(args.wiki, lang)
     wiki_page = urlopen(url).read()
     first_paragraph = get_first_paragraph(wiki_page)
     generate_morse_msg(first_paragraph)
