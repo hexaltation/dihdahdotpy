@@ -14,7 +14,7 @@ import math
 import argparse
 import json
 import pyaudio
-from urllib.request import urlopen
+import urllib.request
 
 
 def get_code():
@@ -234,8 +234,11 @@ elif args.filename:
         generate_morse_msg(msg_from_file)
 elif args.wiki:
     url = generate_url(args.wiki, conf['lang'])
-    wiki_page = urlopen(url).read()
-    first_paragraph = get_first_paragraph(wiki_page)
-    generate_morse_msg(first_paragraph)
+    try:
+        wiki_page = urllib.request.urlopen(url).read()
+        first_paragraph = get_first_paragraph(wiki_page)
+        generate_morse_msg(first_paragraph)
+    except urllib.error.HTTPError:
+        generate_morse_msg('HTTP Error 404: Page Not Found')
 else:
     parser.parse_args(['-h'])
