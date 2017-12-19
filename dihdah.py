@@ -7,10 +7,13 @@
 # GPL V3
 # December 2017
 
-import pyaudio
+import sys
+import os.path
 import re
 import math
 import argparse
+import json
+import pyaudio
 from urllib.request import urlopen
 
 
@@ -160,6 +163,34 @@ def get_first_paragraph(raw_page):
     clean_first_p = re.sub('<.*?>', '', first_p)
     return clean_first_p
 
+
+def set_conf(conf):
+    conf_file_path = sys.path[0] + '/dihdah.conf'
+    with open(conf_file_path, 'w') as conf_file:
+        json.dump(conf, conf_file)
+    pass
+
+
+def get_conf():
+    conf_file_path = sys.path[0] + '/dihdah.conf'
+    with open(conf_file_path, 'r') as conf_file:
+        conf = json.load(conf_file)
+    return conf
+
+
+def check_conf():
+    conf = {}
+    conf_file_path = sys.path[0] + '/dihdah.conf'
+    if os.path.isfile(conf_file_path):
+        conf = get_conf()
+    else:
+        conf['lang'] = 'en'
+        conf['wpm'] = '6'
+        set_conf(conf)
+    return conf
+
+
+conf = check_conf()
 parser = argparse.ArgumentParser(prog='dihdahdotpy', description='A digital Morse code '
                                                                  'operator and trainer')
 parser.add_argument('-m', dest='msg', type=str, nargs='?', help='The message to '
@@ -177,10 +208,9 @@ parser.add_argument('-lang', dest='lang', type=str, nargs='?', help='Choose the 
                                                                     'Default language : "en"')
 
 args = parser.parse_args()
-lang = 'en'
 
 if args.lang is not None:
-    lang = args.lang.lower()
+    conf['lang'] = args.lang.lower()
 if args.msg is not None:
     generate_morse_msg(args.msg)
 elif args.filename is not None:
@@ -188,7 +218,7 @@ elif args.filename is not None:
         msg_from_file = f.read()
         generate_morse_msg(msg_from_file)
 elif args.wiki is not None:
-    url = generate_url(args.wiki, lang)
+    url = generate_url(args.wiki, conf['lang'])
     wiki_page = urlopen(url).read()
     first_paragraph = get_first_paragraph(wiki_page)
     generate_morse_msg(first_paragraph)
