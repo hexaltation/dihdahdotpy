@@ -168,7 +168,7 @@ def set_conf(conf):
     conf_file_path = sys.path[0] + '/dihdah.conf'
     with open(conf_file_path, 'w') as conf_file:
         json.dump(conf, conf_file)
-    pass
+    return 0
 
 
 def get_conf():
@@ -178,15 +178,18 @@ def get_conf():
     return conf
 
 
+def reset_conf():
+    conf = {'lang': 'en', 'wpm': 6}
+    set_conf(conf)
+    return conf
+
+
 def check_conf():
-    conf = {}
     conf_file_path = sys.path[0] + '/dihdah.conf'
     if os.path.isfile(conf_file_path):
         conf = get_conf()
     else:
-        conf['lang'] = 'en'
-        conf['wpm'] = '6'
-        set_conf(conf)
+        conf = reset_conf()
     return conf
 
 
@@ -206,18 +209,30 @@ parser.add_argument('-lang', dest='lang', type=str, nargs='?', help='Choose the 
                                                                     'wikipedia.\nEx. for '
                                                                     'french : "fr". '
                                                                     'Default language : "en"')
+parser.add_argument('-s', dest='wpm', type=int, nargs='?', help='Set speed of transmission in '
+                                                                'words per minutes')
+parser.add_argument('--save', dest='save', help='Save values of passed parameters in .conf '
+                                                'file', action='store_true')
+parser.add_argument('--reset', dest='reset', help='Reset conf file to default values',
+                    action='store_true')
 
 args = parser.parse_args()
 
-if args.lang is not None:
+if args.lang:
     conf['lang'] = args.lang.lower()
-if args.msg is not None:
+if args.wpm:
+    conf['wpm'] = args.wpm
+if args.save:
+    set_conf(conf)
+if args.reset:
+    conf = reset_conf()
+if args.msg:
     generate_morse_msg(args.msg)
-elif args.filename is not None:
+elif args.filename:
     with open(args.filename[0], 'r') as f:
         msg_from_file = f.read()
         generate_morse_msg(msg_from_file)
-elif args.wiki is not None:
+elif args.wiki:
     url = generate_url(args.wiki, conf['lang'])
     wiki_page = urlopen(url).read()
     first_paragraph = get_first_paragraph(wiki_page)
