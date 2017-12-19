@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 # Test for morse code Generator/TX
 # By hexaltation
@@ -55,6 +56,10 @@ def end_tx():
     return ' ' + morse['ETX']
 
 
+def sin_wave(sample_idx, volume, frequency, sample_rate):
+    return volume * math.sin(2 * math.pi * frequency * sample_idx / sample_rate)
+
+
 def create_tx(durations_n_volumes):
     frequency = 220
     sample_rate = 48000
@@ -72,8 +77,8 @@ def create_tx(durations_n_volumes):
         n_samples = int(sample_rate * duration)
         rest_frames = n_samples % sample_rate
 
-        s = lambda t: volume * math.sin(2 * math.pi * frequency * t / sample_rate)
-        samples = (int(s(t) * 0x7f + 0x80) for t in range(n_samples))
+        samples = (int(sin_wave(sample_idx, volume, frequency, sample_rate) * 0x7f + 0x80)
+                   for sample_idx in range(n_samples))
         stream.write(bytes(bytearray(samples)))
         stream.write(b'\x80' * rest_frames)
 
@@ -150,7 +155,7 @@ def generate_url(list_of_words, language):
 
 def get_first_paragraph(raw_page):
     utf8_page = raw_page.decode('utf-8')
-    paragraphs = re.search('<p>(.*?)<\/p>', utf8_page)
+    paragraphs = re.search('<p>(.*?)</p>', utf8_page)
     first_p = paragraphs.group(0)
     clean_first_p = re.sub('<.*?>', '', first_p)
     return clean_first_p
