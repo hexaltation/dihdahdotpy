@@ -2,10 +2,10 @@
 Little implementation of a Morse code generator in CLI.
 
 
-**usage:** dihdahdotpy [-h] [-m [MSG]] [-f FILENAME] [-w [WIKI [WIKI ...]]]<br>
+**usage:** dihdahdotpy [-h] [-m [MSG] | -f FILENAME | -w [WIKI [WIKI ...]]]<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[-lang [LANG]] [-s [WPM]] [--save] [--reset]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[-lang LANG] [-s WPM] [--save | --reset]
 
 A digital Morse code operator and trainer
 

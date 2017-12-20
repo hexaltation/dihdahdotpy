@@ -196,25 +196,27 @@ def check_conf():
 conf = check_conf()
 parser = argparse.ArgumentParser(prog='dihdahdotpy', description='A digital Morse code '
                                                                  'operator and trainer')
-parser.add_argument('-m', dest='msg', type=str, nargs='?', help='The message to '
+message_option = parser.add_mutually_exclusive_group()
+message_option.add_argument('-m', dest='msg', type=str, nargs='?', help='The message to '
                                                                 'translate in morse '
                                                                 'code')
-parser.add_argument('-f', dest='filename', type=str, nargs=1, help='The message to '
+message_option.add_argument('-f', dest='filename', type=str, nargs=1, help='The message to '
                                                                    'translate '
                                                                    'is stored in a text file')
-parser.add_argument('-w', dest='wiki', type=str, nargs='*', help='Read the definition from '
+message_option.add_argument('-w', dest='wiki', type=str, nargs='*', help='Read the definition from '
                                                                  'wikipedia.org of a given '
                                                                  'word')
-parser.add_argument('-lang', dest='lang', type=str, nargs='?', help='Choose the language for '
-                                                                    'wikipedia.\nEx. for '
-                                                                    'french : "fr". '
-                                                                    'Default language : "en"')
-parser.add_argument('-s', dest='wpm', type=int, nargs='?', help='Set speed of transmission in '
-                                                                'words per minutes')
-parser.add_argument('--save', dest='save', help='Save values of passed parameters in .conf '
-                                                'file', action='store_true')
-parser.add_argument('--reset', dest='reset', help='Reset conf file to default values',
-                    action='store_true')
+parser.add_argument('-lang', dest='lang', type=str, nargs=1, help='Choose the language for '
+                                                                  'wikipedia.\nEx. for '
+                                                                  'french : "fr". '
+                                                                  'Default language : "en"')
+parser.add_argument('-s', dest='wpm', type=int, nargs=1, help='Set speed of transmission in '
+                                                              'words per minutes')
+config_option = parser.add_mutually_exclusive_group()
+config_option.add_argument('--save', dest='save', help='Save values of passed parameters in'
+                                                       '.conf file', action='store_true')
+config_option.add_argument('--reset', dest='reset', help='Reset conf file to default values',
+                           action='store_true')
 
 args = parser.parse_args()
 
