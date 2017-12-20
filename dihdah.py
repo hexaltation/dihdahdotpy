@@ -3,7 +3,7 @@
 
 # Test for morse code Generator/TX
 # By hexaltation
-# Version 0.0.2
+# Version 0.0.3
 # GPL V3
 # December 2017
 
@@ -15,6 +15,8 @@ import argparse
 import json
 import pyaudio
 import urllib.request
+import wave
+import time
 
 
 def get_code():
@@ -59,20 +61,36 @@ def end_tx():
     return ' ' + morse['ETX']
 
 
+def save_as_wav(filename, data_array, channels, sample_rate, audio_format):
+    file = wave.open(filename, 'wb')
+    file.setnchannels(channels)
+    file.setsampwidth(audio_format/channels)
+    file.setframerate(sample_rate)
+    file.writeframes(b''.join(data_array))
+    file.close()
+    return 0
+
+
 def sin_wave(sample_idx, volume, frequency, sample_rate):
     return volume * math.sin(2 * math.pi * frequency * sample_idx / sample_rate)
 
 
-def create_tx(durations_n_volumes):
+def create_tx(durations_n_volumes, rec=False, sound=True):
+    if not (sound or rec):
+        return -1
+
     frequency = 220
     sample_rate = 48000
 
     p = pyaudio.PyAudio()
     channels = 2
-    output = True
 
     audio_format = p.get_format_from_width(2)
-    stream = p.open(format=audio_format, channels=channels, rate=sample_rate, output=output)
+
+    if sound:
+        stream = p.open(format=audio_format, channels=channels, rate=sample_rate, output=sound)
+    if rec:
+        samples_data = []
 
     for pair in durations_n_volumes:
         duration = pair[0]
@@ -82,12 +100,22 @@ def create_tx(durations_n_volumes):
 
         samples = (int(sin_wave(sample_idx, volume, frequency, sample_rate) * 0x7f + 0x80)
                    for sample_idx in range(n_samples))
-        stream.write(bytes(bytearray(samples)))
-        stream.write(b'\x80' * rest_frames)
+        if sound:
+            stream.write(bytes(bytearray(samples)))
+            stream.write(b'\x80' * rest_frames)
+        if rec:
+            samples_data.append(bytes(bytearray(samples)))
+            samples_data.append(b'\x80' * rest_frames)
 
-    stream.stop_stream()
-    stream.close()
+    if sound:
+        stream.stop_stream()
+        stream.close()
     p.terminate()
+    if rec:
+        timestamp = str(time.time()).replace('.', '')
+        filename = sys.path[0] + '/' + timestamp + '.wav'
+        save_as_wav(filename, samples_data, channels, sample_rate, audio_format)
+
     return 0
 
 
@@ -120,7 +148,7 @@ def convert_msg(msg, code):
     return coded_msg
 
 
-def generate_morse_msg(msg, wpm=6):
+def generate_morse_msg(msg, wpm=6, rec=False):
     morse = get_code()
 
     speed = (wpm * 50)/60
@@ -144,7 +172,7 @@ def generate_morse_msg(msg, wpm=6):
         elif sign == '_':
             durations_n_volumes.extend(long_pulse)
 
-    return create_tx(durations_n_volumes)
+    return create_tx(durations_n_volumes, rec)
 
 
 def generate_url(list_of_words, language):
@@ -193,25 +221,42 @@ def check_conf():
     return conf
 
 
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
 conf = check_conf()
 parser = argparse.ArgumentParser(prog='dihdahdotpy', description='A digital Morse code '
                                                                  'operator and trainer')
 message_option = parser.add_mutually_exclusive_group()
 message_option.add_argument('-m', dest='msg', type=str, nargs='?', help='The message to '
-                                                                'translate in morse '
-                                                                'code')
+                                                                        'translate in morse '
+                                                                        'code')
 message_option.add_argument('-f', dest='filename', type=str, nargs=1, help='The message to '
-                                                                   'translate '
-                                                                   'is stored in a text file')
-message_option.add_argument('-w', dest='wiki', type=str, nargs='*', help='Read the definition from '
-                                                                 'wikipedia.org of a given '
-                                                                 'word')
+                                                                           'translate '
+                                                                           'is stored in a '
+                                                                           'text file')
+message_option.add_argument('-w', dest='wiki', type=str, nargs='*', help='Read the '
+                                                                         'definition from '
+                                                                         'wikipedia.org of a '
+                                                                         'given word')
 parser.add_argument('-lang', dest='lang', type=str, nargs=1, help='Choose the language for '
                                                                   'wikipedia.\nEx. for '
                                                                   'french : "fr". '
                                                                   'Default language : "en"')
 parser.add_argument('-s', dest='wpm', type=int, nargs=1, help='Set speed of transmission in '
                                                               'words per minutes')
+parser.add_argument('-rec', dest='rec', type=str2bool, nargs='?', default=False, help='set '
+                                                                                    'True to '
+                                                                                    'save '
+                                                                                    'message '
+                                                                                    'as wave '
+                                                                                    'file')
 config_option = parser.add_mutually_exclusive_group()
 config_option.add_argument('--save', dest='save', help='Save values of passed parameters in'
                                                        '.conf file', action='store_true')
@@ -229,17 +274,17 @@ if args.save:
 if args.reset:
     conf = reset_conf()
 if args.msg:
-    generate_morse_msg(args.msg)
+    generate_morse_msg(args.msg, conf['wpm'], args.rec)
 elif args.filename:
     with open(args.filename[0], 'r') as f:
         msg_from_file = f.read()
-        generate_morse_msg(msg_from_file)
+        generate_morse_msg(msg_from_file, conf['wpm'], args.rec)
 elif args.wiki:
     url = generate_url(args.wiki, conf['lang'])
     try:
         wiki_page = urllib.request.urlopen(url).read()
         first_paragraph = get_first_paragraph(wiki_page)
-        generate_morse_msg(first_paragraph)
+        generate_morse_msg(first_paragraph, conf['wpm'], args.rec)
     except urllib.error.HTTPError:
         generate_morse_msg('HTTP Error 404: Page Not Found')
 else:

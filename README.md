@@ -5,7 +5,7 @@ Little implementation of a Morse code generator in CLI.
 **usage:** dihdahdotpy [-h] [-m [MSG] | -f FILENAME | -w [WIKI [WIKI ...]]]<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[-lang LANG] [-s WPM] [--save | --reset]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[-lang LANG] [-s WPM] [-rec [REC]] [--save | --reset]
 
 A digital Morse code operator and trainer
 
@@ -19,6 +19,7 @@ A digital Morse code operator and trainer
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 Ex. for french :  "fr". Default language : "en"  
 &nbsp;&nbsp;&nbsp;-s [WPM]              Set speed of transmission in words per minutes  
+&nbsp;&nbsp;&nbsp;-rec [REC]            set True to save message as wave file
 &nbsp;&nbsp;&nbsp;--save                Save values of passed parameters in .conf file  
 &nbsp;&nbsp;&nbsp;--reset               Reset conf file to default values  
 
