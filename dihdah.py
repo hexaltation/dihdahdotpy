@@ -61,16 +61,6 @@ def end_tx():
     return ' ' + morse['ETX']
 
 
-def save_as_wav(filename, data_array, channels, sample_rate, audio_format):
-    file = wave.open(filename, 'wb')
-    file.setnchannels(channels)
-    file.setsampwidth(audio_format/channels)
-    file.setframerate(sample_rate)
-    file.writeframes(b''.join(data_array))
-    file.close()
-    return 0
-
-
 def sin_wave(sample_idx, volume, frequency, sample_rate):
     return volume * math.sin(2 * math.pi * frequency * sample_idx / sample_rate)
 
@@ -90,7 +80,12 @@ def create_tx(durations_n_volumes, rec=False, sound=True):
     if sound:
         stream = p.open(format=audio_format, channels=channels, rate=sample_rate, output=sound)
     if rec:
-        samples_data = []
+        timestamp = str(time.time()).replace('.', '')
+        filename = sys.path[0] + '/' + timestamp + '.wav'
+        file = wave.open(filename, 'wb')
+        file.setnchannels(channels)
+        file.setsampwidth(2)
+        file.setframerate(sample_rate)
 
     for pair in durations_n_volumes:
         duration = pair[0]
@@ -98,23 +93,23 @@ def create_tx(durations_n_volumes, rec=False, sound=True):
         n_samples = int(sample_rate * duration)
         rest_frames = n_samples % sample_rate
 
-        samples = (int(sin_wave(sample_idx, volume, frequency, sample_rate) * 0x7f + 0x80)
-                   for sample_idx in range(n_samples))
+        samples = []
+        for sample_idx in range(n_samples):
+            samples.append(int(sin_wave(sample_idx, volume, frequency, sample_rate) *
+                               0x7f + 0x80))
         if sound:
             stream.write(bytes(bytearray(samples)))
             stream.write(b'\x80' * rest_frames)
         if rec:
-            samples_data.append(bytes(bytearray(samples)))
-            samples_data.append(b'\x80' * rest_frames)
+            file.writeframes(bytes(bytearray(samples)))
+            file.writeframes(b'\x80' * rest_frames)
 
     if sound:
         stream.stop_stream()
         stream.close()
     p.terminate()
     if rec:
-        timestamp = str(time.time()).replace('.', '')
-        filename = sys.path[0] + '/' + timestamp + '.wav'
-        save_as_wav(filename, samples_data, channels, sample_rate, audio_format)
+        file.close()
 
     return 0
 
@@ -231,36 +226,28 @@ def str2bool(v):
 
 
 conf = check_conf()
-parser = argparse.ArgumentParser(prog='dihdahdotpy', description='A digital Morse code '
-                                                                 'operator and trainer')
+parser = argparse.ArgumentParser(prog='dihdahdotpy',
+                                 description='A digital Morse code operator and trainer')
 message_option = parser.add_mutually_exclusive_group()
-message_option.add_argument('-m', dest='msg', type=str, nargs='?', help='The message to '
-                                                                        'translate in morse '
-                                                                        'code')
-message_option.add_argument('-f', dest='filename', type=str, nargs=1, help='The message to '
-                                                                           'translate '
-                                                                           'is stored in a '
-                                                                           'text file')
-message_option.add_argument('-w', dest='wiki', type=str, nargs='*', help='Read the '
-                                                                         'definition from '
-                                                                         'wikipedia.org of a '
-                                                                         'given word')
-parser.add_argument('-lang', dest='lang', type=str, nargs=1, help='Choose the language for '
-                                                                  'wikipedia.\nEx. for '
-                                                                  'french : "fr". '
-                                                                  'Default language : "en"')
-parser.add_argument('-s', dest='wpm', type=int, nargs=1, help='Set speed of transmission in '
-                                                              'words per minutes')
-parser.add_argument('-rec', dest='rec', type=str2bool, nargs='?', default=False, help='set '
-                                                                                    'True to '
-                                                                                    'save '
-                                                                                    'message '
-                                                                                    'as wave '
-                                                                                    'file')
+message_option.add_argument('-m', dest='msg', type=str, nargs='?',
+                            help='The message to translate in morse code')
+message_option.add_argument('-f', dest='filename', type=str, nargs=1,
+                            help='The message to translate is stored in a text file')
+message_option.add_argument('-w', dest='wiki', type=str, nargs='*',
+                            help='Read the definition from wikipedia.org of a given word')
+parser.add_argument('-lang', dest='lang', type=str, nargs='?',
+                    help='Choose the language for wikipedia.\n'
+                         'Ex. for french : "fr". Default language : "en"')
+parser.add_argument('-s', dest='wpm', type=int, nargs=1,
+                    help='Set speed of transmission in words per minutes')
+parser.add_argument('-rec', dest='rec', type=str2bool, nargs='?', default=False,
+                    help='set True to save message as wave file')
 config_option = parser.add_mutually_exclusive_group()
-config_option.add_argument('--save', dest='save', help='Save values of passed parameters in'
-                                                       '.conf file', action='store_true')
-config_option.add_argument('--reset', dest='reset', help='Reset conf file to default values',
+config_option.add_argument('--save', dest='save',
+                           help='Save values of passed parameters in .conf file',
+                           action='store_true')
+config_option.add_argument('--reset', dest='reset',
+                           help='Reset conf file to default values',
                            action='store_true')
 
 args = parser.parse_args()
