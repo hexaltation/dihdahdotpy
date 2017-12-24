@@ -11,6 +11,7 @@ import sys
 import os.path
 import re
 import math
+import random
 import argparse
 import json
 import pyaudio
@@ -65,7 +66,8 @@ def sin_wave(sample_idx, volume, frequency, sample_rate):
     return volume * math.sin(2 * math.pi * frequency * sample_idx / sample_rate)
 
 
-def create_tx(durations_n_volumes, rec=False, sound=True, dest=sys.path[0]+'/'):
+def create_tx(durations_n_volumes, rec=False, sound=True, dest=sys.path[0]+'/',
+              noise_coeff=0.0):
     if not (sound or rec):
         return -1
 
@@ -95,8 +97,8 @@ def create_tx(durations_n_volumes, rec=False, sound=True, dest=sys.path[0]+'/'):
 
         samples = []
         for sample_idx in range(n_samples):
-            samples.append(int(sin_wave(sample_idx, volume, frequency, sample_rate) *
-                               0x7f + 0x80))
+            samples.append(int((sin_wave(sample_idx, volume, frequency, sample_rate) * 0x7f
+                                + 0x80) * (1 - noise_coeff) + (random.random()) * noise_coeff))
         if sound:
             stream.write(bytes(bytearray(samples)))
             stream.write(b'\x80' * rest_frames)
@@ -143,7 +145,7 @@ def convert_msg(msg, code):
     return coded_msg
 
 
-def generate_morse_msg(msg, wpm=6, rec=False, sound=True, dest=sys.path[0]+'/'):
+def generate_morse_msg(msg, wpm=6, rec=False, sound=True, dest=sys.path[0]+'/', noise=0.0):
     morse = get_code()
 
     speed = (wpm * 50)/60
@@ -167,7 +169,7 @@ def generate_morse_msg(msg, wpm=6, rec=False, sound=True, dest=sys.path[0]+'/'):
         elif sign == '_':
             durations_n_volumes.extend(long_pulse)
 
-    return create_tx(durations_n_volumes, rec, sound, dest)
+    return create_tx(durations_n_volumes, rec, sound, dest, noise)
 
 
 def generate_url(list_of_words, language):
@@ -246,6 +248,8 @@ parser.add_argument('-sound', dest='sound', type=str2bool, nargs='?', default=Tr
                     help='set True to Audio Stream Output')
 parser.add_argument('-d', dest='dest', type=str, nargs='?', default=False,
                     help='set destination directory of wave file')
+parser.add_argument('-n', dest='noise', type=float, nargs='?', default=0,
+                    help='set noise coefficient. Should be between 0 and 1')
 config_option = parser.add_mutually_exclusive_group()
 config_option.add_argument('--save', dest='save',
                            help='save values of passed parameters in .conf file',
@@ -262,22 +266,27 @@ if args.wpm:
     conf['wpm'] = args.wpm
 if args.dest:
     conf['dest'] = args.dest
+if args.noise:
+    conf['noise'] = args.noise
 if args.save:
     set_conf(conf)
 if args.reset:
     conf = reset_conf()
 if args.msg:
-    generate_morse_msg(args.msg, conf['wpm'], args.rec, args.sound, conf['dest'])
+    generate_morse_msg(args.msg, conf['wpm'], args.rec, args.sound, conf['dest'],
+                       float(conf['noise']))
 elif args.filename:
     with open(args.filename[0], 'r') as f:
         msg_from_file = f.read()
-        generate_morse_msg(msg_from_file, conf['wpm'], args.rec, args.sound, conf['dest'])
+        generate_morse_msg(msg_from_file, conf['wpm'], args.rec, args.sound, conf['dest'],
+                           float(conf['noise']))
 elif args.wiki:
     url = generate_url(args.wiki, conf['lang'])
     try:
         wiki_page = urllib.request.urlopen(url).read()
         first_paragraph = get_first_paragraph(wiki_page)
-        generate_morse_msg(first_paragraph, conf['wpm'], args.rec, args.sound, conf['dest'])
+        generate_morse_msg(first_paragraph, conf['wpm'], args.rec, args.sound, conf['dest'],
+                           float(conf['noise']))
     except urllib.error.HTTPError:
         generate_morse_msg('HTTP Error 404: Page Not Found')
 else:
