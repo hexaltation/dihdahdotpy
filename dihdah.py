@@ -96,15 +96,20 @@ def create_tx(durations_n_volumes, rec=False, sound=True, dest=sys.path[0]+'/',
         rest_frames = n_samples % sample_rate
 
         samples = []
+        rest = []
         for sample_idx in range(n_samples):
             samples.append(int((sin_wave(sample_idx, volume, frequency, sample_rate) * 0x7f
-                                + 0x80) * (1 - noise_coeff) + (random.random()) * noise_coeff))
+                                + 0x80) * (1 - noise_coeff) +
+                               (random.random() * 127 * noise_coeff)))
+        for i in range(rest_frames):
+            rest.append(int(0x80 * (1 - noise_coeff) + (random.random() * 127) * noise_coeff))
+
         if sound:
             stream.write(bytes(bytearray(samples)))
-            stream.write(b'\x80' * rest_frames)
+            stream.write(bytes(bytearray(rest)))
         if rec:
             file.writeframes(bytes(bytearray(samples)))
-            file.writeframes(b'\x80' * rest_frames)
+            file.writeframes(bytes(bytearray(rest)))
 
     if sound:
         stream.stop_stream()
@@ -189,33 +194,33 @@ def get_first_paragraph(raw_page):
     return clean_first_p
 
 
-def set_conf(conf):
+def set_conf(config):
     conf_file_path = sys.path[0] + '/dihdah.conf'
     with open(conf_file_path, 'w') as conf_file:
-        json.dump(conf, conf_file)
+        json.dump(config, conf_file)
     return 0
 
 
 def get_conf():
     conf_file_path = sys.path[0] + '/dihdah.conf'
     with open(conf_file_path, 'r') as conf_file:
-        conf = json.load(conf_file)
-    return conf
+        config = json.load(conf_file)
+    return config
 
 
 def reset_conf():
-    conf = {'lang': 'en', 'wpm': 6, 'dest': sys.path[0] + '/'}
-    set_conf(conf)
-    return conf
+    config = {'lang': 'en', 'wpm': 6, 'dest': sys.path[0] + '/'}
+    set_conf(config)
+    return config
 
 
 def check_conf():
     conf_file_path = sys.path[0] + '/dihdah.conf'
     if os.path.isfile(conf_file_path):
-        conf = get_conf()
+        config = get_conf()
     else:
-        conf = reset_conf()
-    return conf
+        config = reset_conf()
+    return config
 
 
 def str2bool(v):
