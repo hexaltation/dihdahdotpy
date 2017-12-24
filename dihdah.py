@@ -230,16 +230,16 @@ parser = argparse.ArgumentParser(prog='dihdahdotpy',
                                  description='A digital Morse code operator and trainer')
 message_option = parser.add_mutually_exclusive_group()
 message_option.add_argument('-m', dest='msg', type=str, nargs='?',
-                            help='The message to translate in morse code')
+                            help='the message to translate in morse code')
 message_option.add_argument('-f', dest='filename', type=str, nargs=1,
-                            help='The message to translate is stored in a text file')
+                            help='the message to translate is stored in a text file')
 message_option.add_argument('-w', dest='wiki', type=str, nargs='*',
-                            help='Read the definition from wikipedia.org of a given word')
+                            help='read the definition from wikipedia.org of a given word')
 parser.add_argument('-lang', dest='lang', type=str, nargs='?',
-                    help='Choose the language for wikipedia.\n'
+                    help='choose the language for wikipedia.\n'
                          'Ex. for french : "fr". Default language : "en"')
 parser.add_argument('-s', dest='wpm', type=int, nargs=1,
-                    help='Set speed of transmission in words per minutes')
+                    help='set speed of transmission in words per minutes')
 parser.add_argument('-rec', dest='rec', type=str2bool, nargs='?', default=False,
                     help='set True to save message as wave file')
 parser.add_argument('-sound', dest='sound', type=str2bool, nargs='?', default=True,
@@ -248,10 +248,10 @@ parser.add_argument('-d', dest='dest', type=str, nargs='?', default=False,
                     help='set destination directory of wave file')
 config_option = parser.add_mutually_exclusive_group()
 config_option.add_argument('--save', dest='save',
-                           help='Save values of passed parameters in .conf file',
+                           help='save values of passed parameters in .conf file',
                            action='store_true')
 config_option.add_argument('--reset', dest='reset',
-                           help='Reset conf file to default values',
+                           help='reset conf file to default values',
                            action='store_true')
 
 args = parser.parse_args()
