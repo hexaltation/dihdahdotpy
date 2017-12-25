@@ -231,68 +231,68 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
+if __name__ == "__main__":
+    conf = check_conf()
+    parser = argparse.ArgumentParser(prog='dihdahdotpy',
+                                     description='A digital Morse code operator and trainer')
+    message_option = parser.add_mutually_exclusive_group()
+    message_option.add_argument('-m', dest='msg', type=str, nargs='?',
+                                help='the message to translate in morse code')
+    message_option.add_argument('-f', dest='filename', type=str, nargs=1,
+                                help='the message to translate is stored in a text file')
+    message_option.add_argument('-w', dest='wiki', type=str, nargs='*',
+                                help='read the definition from wikipedia.org of a given word')
+    parser.add_argument('-lang', dest='lang', type=str, nargs='?',
+                        help='choose the language for wikipedia.\n'
+                             'Ex. for french : "fr". Default language : "en"')
+    parser.add_argument('-s', dest='wpm', type=int, nargs=1,
+                        help='set speed of transmission in words per minutes')
+    parser.add_argument('-rec', dest='rec', type=str2bool, nargs='?', default=False,
+                        help='set True to save message as wave file')
+    parser.add_argument('-sound', dest='sound', type=str2bool, nargs='?', default=True,
+                        help='set True to Audio Stream Output')
+    parser.add_argument('-d', dest='dest', type=str, nargs='?', default=False,
+                        help='set destination directory of wave file')
+    parser.add_argument('-n', dest='noise', type=float, nargs='?', default=0,
+                        help='set noise coefficient. Should be between 0 and 1')
+    config_option = parser.add_mutually_exclusive_group()
+    config_option.add_argument('--save', dest='save',
+                               help='save values of passed parameters in .conf file',
+                               action='store_true')
+    config_option.add_argument('--reset', dest='reset',
+                               help='reset conf file to default values',
+                               action='store_true')
 
-conf = check_conf()
-parser = argparse.ArgumentParser(prog='dihdahdotpy',
-                                 description='A digital Morse code operator and trainer')
-message_option = parser.add_mutually_exclusive_group()
-message_option.add_argument('-m', dest='msg', type=str, nargs='?',
-                            help='the message to translate in morse code')
-message_option.add_argument('-f', dest='filename', type=str, nargs=1,
-                            help='the message to translate is stored in a text file')
-message_option.add_argument('-w', dest='wiki', type=str, nargs='*',
-                            help='read the definition from wikipedia.org of a given word')
-parser.add_argument('-lang', dest='lang', type=str, nargs='?',
-                    help='choose the language for wikipedia.\n'
-                         'Ex. for french : "fr". Default language : "en"')
-parser.add_argument('-s', dest='wpm', type=int, nargs=1,
-                    help='set speed of transmission in words per minutes')
-parser.add_argument('-rec', dest='rec', type=str2bool, nargs='?', default=False,
-                    help='set True to save message as wave file')
-parser.add_argument('-sound', dest='sound', type=str2bool, nargs='?', default=True,
-                    help='set True to Audio Stream Output')
-parser.add_argument('-d', dest='dest', type=str, nargs='?', default=False,
-                    help='set destination directory of wave file')
-parser.add_argument('-n', dest='noise', type=float, nargs='?', default=0,
-                    help='set noise coefficient. Should be between 0 and 1')
-config_option = parser.add_mutually_exclusive_group()
-config_option.add_argument('--save', dest='save',
-                           help='save values of passed parameters in .conf file',
-                           action='store_true')
-config_option.add_argument('--reset', dest='reset',
-                           help='reset conf file to default values',
-                           action='store_true')
+    args = parser.parse_args()
 
-args = parser.parse_args()
-
-if args.lang:
-    conf['lang'] = args.lang.lower()
-if args.wpm:
-    conf['wpm'] = args.wpm
-if args.dest:
-    conf['dest'] = args.dest
-if args.noise:
-    conf['noise'] = args.noise
-if args.save:
-    set_conf(conf)
-if args.reset:
-    conf = reset_conf()
-if args.msg:
-    generate_morse_msg(args.msg, conf['wpm'], args.rec, args.sound, conf['dest'],
-                       float(conf['noise']))
-elif args.filename:
-    with open(args.filename[0], 'r') as f:
-        msg_from_file = f.read()
-        generate_morse_msg(msg_from_file, conf['wpm'], args.rec, args.sound, conf['dest'],
+    if args.lang:
+        conf['lang'] = args.lang.lower()
+    if args.wpm:
+        conf['wpm'] = args.wpm
+    if args.dest:
+        conf['dest'] = args.dest
+    if args.noise:
+        conf['noise'] = args.noise
+    if args.save:
+        set_conf(conf)
+    if args.reset:
+        conf = reset_conf()
+    if args.msg:
+        generate_morse_msg(args.msg, conf['wpm'], args.rec, args.sound, conf['dest'],
                            float(conf['noise']))
-elif args.wiki:
-    url = generate_url(args.wiki, conf['lang'])
-    try:
-        wiki_page = urllib.request.urlopen(url).read()
-        first_paragraph = get_first_paragraph(wiki_page)
-        generate_morse_msg(first_paragraph, conf['wpm'], args.rec, args.sound, conf['dest'],
-                           float(conf['noise']))
-    except urllib.error.HTTPError:
-        generate_morse_msg('HTTP Error 404: Page Not Found')
-else:
-    parser.parse_args(['-h'])
+    elif args.filename:
+        with open(args.filename[0], 'r') as f:
+            msg_from_file = f.read()
+            generate_morse_msg(msg_from_file, conf['wpm'], args.rec, args.sound, conf['dest'],
+                               float(conf['noise']))
+    elif args.wiki:
+        url = generate_url(args.wiki, conf['lang'])
+        try:
+            wiki_page = urllib.request.urlopen(url).read()
+            first_paragraph = get_first_paragraph(wiki_page)
+            generate_morse_msg(first_paragraph, conf['wpm'], args.rec, args.sound, conf['dest'],
+                               float(conf['noise']))
+        except urllib.error.HTTPError:
+            generate_morse_msg('HTTP Error 404: Page Not Found')
+    else:
+        parser.parse_args(['-h'])
