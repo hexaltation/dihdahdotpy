@@ -35,6 +35,14 @@ except Exception as e:
 # Test 2 Check test message emission
 print(Bcolors.OKBLUE + '_____Test 2_____' + Bcolors.ENDC)
 print(Bcolors.HEADER + 'Tx message "test"' + Bcolors.ENDC)
+if os.path.isfile(sys.path[0] + '/dihdah.conf'):
+    try:
+        os.remove(sys.path[0] + '/dihdah.conf')
+        print('dihdah.conf removed')
+    except Exception as e:
+        print(e)
+    finally:
+        print('There is no (more) dihdah.conf in the current folder')
 try:
     test = os.system("./dihdah.py -m 'test'")
     if test != 0:
@@ -110,6 +118,80 @@ else:
     tests.append('fail')
 
 
+# Test 6 save given parameters in conf file
+print(Bcolors.OKBLUE + '_____Test 6_____' + Bcolors.ENDC)
+print(Bcolors.HEADER + 'Save given parameters in conf file' + Bcolors.ENDC)
+if os.path.isfile(sys.path[0] + '/dihdah.conf'):
+    try:
+        os.remove(sys.path[0] + '/dihdah.conf')
+        print('dihdah.conf removed')
+    except Exception as e:
+        print(e)
+    finally:
+        print('There is no (more) dihdah.conf in the current folder')
+try:
+    test = os.system("./dihdah.py -lang 'py' -s 9000 -d '/folda' -n 0.2 --save")
+    config = dihdah.get_conf()
+    if test != 0:
+        raise test
+    else:
+        if os.path.isfile(sys.path[0] + '/dihdah.conf'):
+            try:
+                config = dihdah.get_conf()
+                if config['lang'] == 'py' and config['wpm'] == 9000 and config['dest'] == \
+                        '/folda' and config['noise'] == 0.2 and len(config) == 4:
+                    print(Bcolors.OKGREEN + 'Test 6 passed\n' + Bcolors.ENDC)
+                    tests.append('success')
+                else:
+                    raise Exception('Config file is not as expected')
+            except Exception as e:
+                print(e)
+                print(Bcolors.FAIL + 'Failed to pass test 6\n' + Bcolors.ENDC)
+                tests.append('fail')
+                exit(1)
+        print(Bcolors.OKGREEN + 'Test 6 passed\n' + Bcolors.ENDC)
+        tests.append('success')
+except Exception as e:
+    print(e)
+    print(Bcolors.FAIL + 'Failed to pass test 6\n' + Bcolors.ENDC)
+    tests.append('fail')
+    exit(1)
+
+
+# Test 7 reset conf file
+print(Bcolors.OKBLUE + '_____Test 7_____' + Bcolors.ENDC)
+print(Bcolors.HEADER + 'Reset conf file' + Bcolors.ENDC)
+try:
+    if os.path.isfile(sys.path[0] + '/dihdah.conf'):
+        test = os.system("./dihdah.py -lang 'py' -s 9000 -d '/folda' -n 0 --reset")
+        config = dihdah.get_conf()
+        if test != 0:
+            raise test
+        else:
+            if os.path.isfile(sys.path[0] + '/dihdah.conf'):
+                try:
+                    config = dihdah.get_conf()
+                    if config['lang'] == 'en' and config['wpm'] == 6 and \
+                                    config['dest'] == sys.path[0] + '/' and \
+                                    config['noise'] == 0 and len(config) == 4:
+                        print(Bcolors.OKGREEN + 'Test 6 passed\n' + Bcolors.ENDC)
+                        tests.append('success')
+                    else:
+                        raise Exception('Config file is not as expected')
+                except Exception as e:
+                    print(e)
+                    print(Bcolors.FAIL + 'Failed to pass test 7\n' + Bcolors.ENDC)
+                    tests.append('fail')
+            print(Bcolors.OKGREEN + 'Test 7 passed\n' + Bcolors.ENDC)
+            tests.append('success')
+    else:
+        raise Exception('No config file to reset')
+except Exception as e:
+    print(e)
+    print(Bcolors.FAIL + 'Failed to pass test 7\n' + Bcolors.ENDC)
+    tests.append('fail')
+
+
 if 'fail' in tests:
     print('Tests failed')
 else:
@@ -121,13 +203,17 @@ for idx, test in enumerate(tests):
     elif test == 'fail':
         print(Bcolors.FAIL + 'Test ' + str(idx + 1) + ' ' + test + Bcolors.ENDC)
 
+
 # TODO :
-# Check Save
-# Check reset
+# Add custom type where needed for args limit values
+# Check entry types for each parameters and limit values
 # Check -w
 # Check -w 404
 # Check -w without argument
-# Check -m without argument
+# Check -f without argument
+# Check -f
 # Check Noise (may be set random seed) checksum of file essence ffmpeg hash
 # unitary test passing and non passing for all functions
+# Check mutual exclusions
+# Isolate test as function in order to be called as subset of tests from testing library
 # And many more

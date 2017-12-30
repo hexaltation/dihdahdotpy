@@ -209,7 +209,7 @@ def get_conf():
 
 
 def reset_conf():
-    config = {'lang': 'en', 'wpm': 6, 'dest': sys.path[0] + '/'}
+    config = {'lang': 'en', 'wpm': 6, 'dest': sys.path[0] + '/', 'noise': False}
     set_conf(config)
     return config
 
@@ -245,7 +245,7 @@ if __name__ == "__main__":
     parser.add_argument('-lang', dest='lang', type=str, nargs='?',
                         help='choose the language for wikipedia.\n'
                              'Ex. for french : "fr". Default language : "en"')
-    parser.add_argument('-s', dest='wpm', type=int, nargs=1,
+    parser.add_argument('-s', dest='wpm', type=int, nargs='?',
                         help='set speed of transmission in words per minutes')
     parser.add_argument('-rec', dest='rec', type=str2bool, nargs='?', default=False,
                         help='set True to save message as wave file')
