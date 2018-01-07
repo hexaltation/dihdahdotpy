@@ -280,9 +280,9 @@ if __name__ == "__main__":
     parser.add_argument('-s', dest='wpm', type=words_per_minute, nargs='?',
                         help='set speed of transmission in words per minutes. Should be an '
                              'int between 1 and 30')
-    parser.add_argument('-rec', dest='rec', type=str2bool, nargs='?', default=False,
+    parser.add_argument('-rec', dest='rec', type=str2bool, nargs=1, default=False,
                         help='set True to save message as wave file')
-    parser.add_argument('-sound', dest='sound', type=str2bool, nargs='?', default=True,
+    parser.add_argument('-sound', dest='sound', type=str2bool, nargs=1, default=True,
                         help='set True to Audio Stream Output')
     parser.add_argument('-d', dest='dest', type=str, nargs='?',
                         help='set destination directory of wave file')
