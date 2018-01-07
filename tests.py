@@ -134,7 +134,7 @@ try:
         if os.path.isfile(sys.path[0] + '/dihdah.conf'):
             try:
                 config = dihdah.get_conf()
-                if config['lang'] == 'py' and config['wpm'] == 9000 and config['dest'] == \
+                if config['lang'] == 'py' and config['wpm'] == 30 and config['dest'] == \
                         '/folda' and config['noise'] == 0.2 and len(config) == 4:
                     print(Bcolors.OKGREEN + 'Test 6 passed\n' + Bcolors.ENDC)
                     tests.append('success')
@@ -144,12 +144,10 @@ try:
                 print(e)
                 print(Bcolors.FAIL + 'Failed to pass test 6\n' + Bcolors.ENDC)
                 tests.append('fail')
-                exit(1)
 except Exception as e:
     print(e)
     print(Bcolors.FAIL + 'Failed to pass test 6\n' + Bcolors.ENDC)
     tests.append('fail')
-    exit(1)
 
 # Test 7 reset conf file
 print(Bcolors.OKBLUE + '_____Test 7_____' + Bcolors.ENDC)
@@ -197,7 +195,7 @@ for idx, test in enumerate(tests):
 
 
 # TODO :
-# Add custom type where needed for args limit values
+# implement -o set filename
 # Check entry types for each parameters and limit values
 # Check -w
 # Check -w 404
