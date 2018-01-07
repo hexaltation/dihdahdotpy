@@ -8,11 +8,12 @@
 # December 2017
 
 import sys
-import os.path
+import os
 import re
 import math
 import random
 import argparse
+import subprocess
 import json
 import pyaudio
 import urllib.request
@@ -287,11 +288,21 @@ if __name__ == "__main__":
                                float(conf['noise']))
     elif args.wiki:
         url = generate_url(args.wiki, conf['lang'])
+        print(url)
+        try:
+            connection = subprocess.check_call(['ping', '-c', '3', '-t', '3', '8.8.8.8'],
+                                               stdout=subprocess.DEVNULL,
+                                               stderr=subprocess.STDOUT)
+            if connection != 0:
+                raise Exception('Connection to internet failed')
+        except Exception as e:
+            print(e)
+            exit(1)
         try:
             wiki_page = urllib.request.urlopen(url).read()
             first_paragraph = get_first_paragraph(wiki_page)
-            generate_morse_msg(first_paragraph, conf['wpm'], args.rec, args.sound, conf['dest'],
-                               float(conf['noise']))
+            generate_morse_msg(first_paragraph, conf['wpm'], args.rec, args.sound,
+                               conf['dest'], float(conf['noise']))
         except urllib.error.HTTPError:
             generate_morse_msg('HTTP Error 404: Page Not Found')
     else:

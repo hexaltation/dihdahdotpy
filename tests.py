@@ -16,6 +16,7 @@ class Bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+
 # Test 1 Check launch command without any options
 print(Bcolors.OKBLUE + '_____Test 1_____' + Bcolors.ENDC)
 print(Bcolors.HEADER + 'Check launch command without any options' + Bcolors.ENDC)
@@ -30,7 +31,6 @@ except Exception as e:
     print(e)
     print(Bcolors.FAIL + 'Failed to pass test 1\n' + Bcolors.ENDC)
     tests.append('fail')
-
 
 # Test 2 Check test message emission
 print(Bcolors.OKBLUE + '_____Test 2_____' + Bcolors.ENDC)
@@ -55,7 +55,6 @@ except Exception as e:
     print(Bcolors.FAIL + 'Failed to pass test 2\n' + Bcolors.ENDC)
     tests.append('fail')
 
-
 # Test 3 Check message emission without argument
 print(Bcolors.OKBLUE + '_____Test 3_____' + Bcolors.ENDC)
 print(Bcolors.HEADER + 'Tx message without argument' + Bcolors.ENDC)
@@ -71,7 +70,6 @@ except Exception as e:
     print(e)
     print(Bcolors.FAIL + 'Failed to pass test 3\n' + Bcolors.ENDC)
     tests.append('fail')
-
 
 # Test 4 conf file creation
 print(Bcolors.OKBLUE + '_____Test 4_____' + Bcolors.ENDC)
@@ -96,7 +94,6 @@ except Exception as e:
     print(Bcolors.FAIL + 'Failed to pass test 4\n' + Bcolors.ENDC)
     tests.append('fail')
 
-
 # Test 5 conf file reading
 print(Bcolors.OKBLUE + '_____Test 5_____' + Bcolors.ENDC)
 print(Bcolors.HEADER + 'Conf file reading' + Bcolors.ENDC)
@@ -116,7 +113,6 @@ else:
     print('No conf file to check')
     print(Bcolors.FAIL + 'Failed to pass test 5\n' + Bcolors.ENDC)
     tests.append('fail')
-
 
 # Test 6 save given parameters in conf file
 print(Bcolors.OKBLUE + '_____Test 6_____' + Bcolors.ENDC)
@@ -149,14 +145,11 @@ try:
                 print(Bcolors.FAIL + 'Failed to pass test 6\n' + Bcolors.ENDC)
                 tests.append('fail')
                 exit(1)
-        print(Bcolors.OKGREEN + 'Test 6 passed\n' + Bcolors.ENDC)
-        tests.append('success')
 except Exception as e:
     print(e)
     print(Bcolors.FAIL + 'Failed to pass test 6\n' + Bcolors.ENDC)
     tests.append('fail')
     exit(1)
-
 
 # Test 7 reset conf file
 print(Bcolors.OKBLUE + '_____Test 7_____' + Bcolors.ENDC)
@@ -171,10 +164,12 @@ try:
             if os.path.isfile(sys.path[0] + '/dihdah.conf'):
                 try:
                     config = dihdah.get_conf()
-                    if config['lang'] == 'en' and config['wpm'] == 6 and \
-                                    config['dest'] == sys.path[0] + '/' and \
-                                    config['noise'] == 0 and len(config) == 4:
-                        print(Bcolors.OKGREEN + 'Test 6 passed\n' + Bcolors.ENDC)
+                    if config['lang'] == 'en'\
+                            and config['wpm'] == 6\
+                            and config['dest'] == sys.path[0] + '/'\
+                            and config['noise'] == 0\
+                            and len(config) == 4:
+                        print(Bcolors.OKGREEN + 'Test 7 passed\n' + Bcolors.ENDC)
                         tests.append('success')
                     else:
                         raise Exception('Config file is not as expected')
@@ -182,8 +177,6 @@ try:
                     print(e)
                     print(Bcolors.FAIL + 'Failed to pass test 7\n' + Bcolors.ENDC)
                     tests.append('fail')
-            print(Bcolors.OKGREEN + 'Test 7 passed\n' + Bcolors.ENDC)
-            tests.append('success')
     else:
         raise Exception('No config file to reset')
 except Exception as e:
@@ -191,11 +184,10 @@ except Exception as e:
     print(Bcolors.FAIL + 'Failed to pass test 7\n' + Bcolors.ENDC)
     tests.append('fail')
 
-
 if 'fail' in tests:
-    print('Tests failed')
+    print(Bcolors.FAIL + 'Tests failed\n' + Bcolors.ENDC)
 else:
-    print('Tests succeed')
+    print(Bcolors.OKGREEN + 'Tests failed\n' + Bcolors.ENDC)
 print('Summary:')
 for idx, test in enumerate(tests):
     if test == 'success':
@@ -216,4 +208,6 @@ for idx, test in enumerate(tests):
 # unitary test passing and non passing for all functions
 # Check mutual exclusions
 # Isolate test as function in order to be called as subset of tests from testing library
+# Better names (humanized) for .wav files
+# rewrite tests with tries around
 # And many more
