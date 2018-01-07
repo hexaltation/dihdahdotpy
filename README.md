@@ -5,8 +5,10 @@ Little implementation of a Morse code generator in CLI.
 **usage:** dihdahdotpy [-h] [-m [MSG] | -f FILENAME | -w [WIKI [WIKI ...]]]<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[-lang [LANG]] [-s WPM] [-rec [REC]] [-sound [SOUND]]
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[-d [DEST]] [--save | --reset]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[-lang [LANG]] [-s WPM] [-rec [REC]] [-sound [SOUND]]  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[-d [DEST]] [-n [NOISE]] [--save | --reset]
 
 A digital Morse code operator and trainer
 
@@ -20,10 +22,15 @@ word`
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 `Ex. for french :  "fr". Default language : "en"`  
-&nbsp;&nbsp;&nbsp;-s [WPM]              `set speed of transmission in words per minutes`  
+&nbsp;&nbsp;&nbsp;-s [WPM]              `set speed of transmission in words per minutes. Should
+ be an int between 1 and 30
+`  
 &nbsp;&nbsp;&nbsp;-rec [REC]            `set True to save message as wave file`  
 &nbsp;&nbsp;&nbsp;-sound [SOUND]        `set True to Audio Stream Output`  
 &nbsp;&nbsp;&nbsp;-d [DEST]             `set destination directory of wave file`  
+&nbsp;&nbsp;&nbsp;-n [NOISE]            `set noise coefficient. Should a float be between 0 and
+ 1`
+
 &nbsp;&nbsp;&nbsp;--save                `save values of passed parameters in .conf file`  
 &nbsp;&nbsp;&nbsp;--reset               `reset conf file to default values`  
 

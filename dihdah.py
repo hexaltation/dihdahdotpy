@@ -232,6 +232,27 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
+
+def words_per_minute(v):
+    if not v.isdigit():
+        raise argparse.ArgumentTypeError('Integer value expected.')
+    if int(v) < 1:
+        return 1
+    elif int(v) > 30:
+        return 30
+
+
+def string2float(v):
+    try:
+        float(v)
+        if v < 0:
+            return 0.0
+        elif v > 1:
+            return 1.0
+    except ValueError:
+        raise argparse.ArgumentTypeError('Float value expected.')
+
+
 if __name__ == "__main__":
     conf = check_conf()
     parser = argparse.ArgumentParser(prog='dihdahdotpy',
@@ -246,16 +267,17 @@ if __name__ == "__main__":
     parser.add_argument('-lang', dest='lang', type=str, nargs='?',
                         help='choose the language for wikipedia.\n'
                              'Ex. for french : "fr". Default language : "en"')
-    parser.add_argument('-s', dest='wpm', type=int, nargs='?',
-                        help='set speed of transmission in words per minutes')
+    parser.add_argument('-s', dest='wpm', type=words_per_minute, nargs='?',
+                        help='set speed of transmission in words per minutes. Should be an '
+                             'int between 1 and 30')
     parser.add_argument('-rec', dest='rec', type=str2bool, nargs='?', default=False,
                         help='set True to save message as wave file')
     parser.add_argument('-sound', dest='sound', type=str2bool, nargs='?', default=True,
                         help='set True to Audio Stream Output')
     parser.add_argument('-d', dest='dest', type=str, nargs='?', default=False,
                         help='set destination directory of wave file')
-    parser.add_argument('-n', dest='noise', type=float, nargs='?', default=0,
-                        help='set noise coefficient. Should be between 0 and 1')
+    parser.add_argument('-n', dest='noise', type=string2float, nargs='?', default=0,
+                        help='set noise coefficient. Should a float be between 0 and 1')
     config_option = parser.add_mutually_exclusive_group()
     config_option.add_argument('--save', dest='save',
                                help='save values of passed parameters in .conf file',
@@ -288,7 +310,6 @@ if __name__ == "__main__":
                                float(conf['noise']))
     elif args.wiki:
         url = generate_url(args.wiki, conf['lang'])
-        print(url)
         try:
             connection = subprocess.check_call(['ping', '-c', '3', '-t', '3', '8.8.8.8'],
                                                stdout=subprocess.DEVNULL,
