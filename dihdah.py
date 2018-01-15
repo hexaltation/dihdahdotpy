@@ -250,7 +250,7 @@ def words_per_minute(v):
         return 30
 
 
-def string2float(v):
+def noise2float(v):
     try:
         v = float(v)
         if v < 0:
@@ -288,7 +288,7 @@ if __name__ == "__main__":
                         help='set destination directory of wave file')
     parser.add_argument('-o', dest='output', type=str, nargs='?',
                         help='set name of output file')
-    parser.add_argument('-n', dest='noise', type=string2float, nargs='?',
+    parser.add_argument('-n', dest='noise', type=noise2float, nargs='?',
                         help='set noise coefficient. Should a float be between 0 and 1')
     config_option = parser.add_mutually_exclusive_group()
     config_option.add_argument('--save', dest='save',
@@ -322,7 +322,7 @@ if __name__ == "__main__":
         generate_morse_msg(conf)
     elif args.filename:
         with open(args.filename[0], 'r') as f:
-            conf['msg'] = f.read()
+            conf['msg'] = f.read().rstrip()
             generate_morse_msg(conf)
     elif args.wiki:
         url = generate_url(args.wiki, conf['lang'])

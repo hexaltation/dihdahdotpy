@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 import dihdah
+import filecmp
 
 tests = []
 
@@ -219,7 +220,7 @@ except Exception as e:
 
 # Test 10 Check test message emission from file
 print(Bcolors.OKBLUE + '_____Test 10_____' + Bcolors.ENDC)
-print(Bcolors.HEADER + 'Tx message "test" in -f mode' + Bcolors.ENDC)
+print(Bcolors.HEADER + 'Tx message "HTTP Error 404: Page Not Found" in -f mode' + Bcolors.ENDC)
 if os.path.isfile(sys.path[0] + '/dihdah.conf'):
     try:
         os.remove(sys.path[0] + '/dihdah.conf')
@@ -250,12 +251,44 @@ except Exception as e:
     print(Bcolors.FAIL + 'Failed to pass test 10\n' + Bcolors.ENDC)
     tests.append('fail')
 
+# Test 11 Check mode -w 404 error
+print(Bcolors.OKBLUE + '_____Test 11_____' + Bcolors.ENDC)
+print(Bcolors.HEADER + 'Check mode -w 404 error' + Bcolors.ENDC)
+try:
+    test = os.system("./dihdah.py -w 'dihdahdotpy' -o wiki404Test -rec 1")
+    if test != 0:
+        raise Exception(test)
+    elif filecmp.cmp(sys.path[0] + '/modeFileTest.wav', sys.path[0] + '/wiki404Test.wav'):
+        print(Bcolors.OKGREEN + 'Test 11 passed\n' + Bcolors.ENDC)
+        tests.append('success')
+    else:
+        raise Exception('The two files are different')
+except Exception as e:
+    print(e)
+    print(Bcolors.FAIL + 'Failed to pass test 11\n' + Bcolors.ENDC)
+    tests.append('fail')
+    exit(1)
+try:
+    os.remove(sys.path[0] + '/modeFileTest.wav')
+    print('test.txt removed')
+except Exception as e:
+    print(e)
+finally:
+    print('There is no (more) modeFileTest.wav in the current folder')
+try:
+    os.remove(sys.path[0] + '/wiki404Test.wav')
+    print('test.txt removed')
+except Exception as e:
+    print(e)
+finally:
+    print('There is no (more) wiki404Test.wav in the current folder')
+
 
 # Tests Summary
 if 'fail' in tests:
-    print(Bcolors.FAIL + 'Tests failed\n' + Bcolors.ENDC)
+    print(Bcolors.FAIL + '\nTests failed\n' + Bcolors.ENDC)
 else:
-    print(Bcolors.OKGREEN + 'Tests Succeed\n' + Bcolors.ENDC)
+    print(Bcolors.OKGREEN + '\nTests Succeed\n' + Bcolors.ENDC)
 print('Summary:')
 for idx, test in enumerate(tests):
     if test == 'success':
@@ -265,9 +298,7 @@ for idx, test in enumerate(tests):
 
 
 # TODO :
-# Check entry types for each parameters and limit values
 # Check -w
-# Check -w 404
 # Check Noise (may be set random seed) checksum of file essence ffmpeg hash
 # unitary test passing and non passing for all functions
 # Check mutual exclusions
