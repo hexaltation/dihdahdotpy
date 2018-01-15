@@ -3,6 +3,8 @@ import subprocess
 import sys
 import dihdah
 import filecmp
+import urllib
+import re
 
 tests = []
 
@@ -206,7 +208,7 @@ except Exception as e:
 print(Bcolors.OKBLUE + '_____Test 9_____' + Bcolors.ENDC)
 print(Bcolors.HEADER + 'Tx message without argument in -w mode' + Bcolors.ENDC)
 try:
-    stdout = subprocess.check_output("./dihdah.py -w", shell=True).decode(encoding='UTF-8')
+    stdout = subprocess.check_output("./dihdah.py -w", shell=True).decode(encoding='UTF-8').rstrip()
     print(stdout)
     if 'usage: dihdahdotpy' not in stdout:
         raise Exception(stdout)
@@ -224,11 +226,11 @@ print(Bcolors.HEADER + 'Tx message "HTTP Error 404: Page Not Found" in -f mode' 
 if os.path.isfile(sys.path[0] + '/dihdah.conf'):
     try:
         os.remove(sys.path[0] + '/dihdah.conf')
-        print('dihdah.conf removed\n')
+        print('dihdah.conf removed')
     except Exception as e:
         print(e)
     finally:
-        print('There is no (more) dihdah.conf in the current folder\n')
+        print('There is no (more) dihdah.conf in the current folder')
 try:
     sourcefile = sys.path[0] + '/test.txt'
     os.system("echo 'HTTP Error 404: Page Not Found' > test.txt")
@@ -251,7 +253,7 @@ except Exception as e:
     print(Bcolors.FAIL + 'Failed to pass test 10\n' + Bcolors.ENDC)
     tests.append('fail')
 
-# Test 11 Check mode -w 404 error
+# Test 11 Check -w mode 404 error
 print(Bcolors.OKBLUE + '_____Test 11_____' + Bcolors.ENDC)
 print(Bcolors.HEADER + 'Check mode -w 404 error' + Bcolors.ENDC)
 try:
@@ -259,6 +261,13 @@ try:
     if test != 0:
         raise Exception(test)
     elif filecmp.cmp(sys.path[0] + '/modeFileTest.wav', sys.path[0] + '/wiki404Test.wav'):
+        try:
+            os.remove(sys.path[0] + '/modeFileTest.wav')
+            print('modeFileTest removed')
+        except Exception as e:
+            print(e)
+        finally:
+            print('There is no (more) modeFileTest.wav in the current folder')
         print(Bcolors.OKGREEN + 'Test 11 passed\n' + Bcolors.ENDC)
         tests.append('success')
     else:
@@ -267,21 +276,46 @@ except Exception as e:
     print(e)
     print(Bcolors.FAIL + 'Failed to pass test 11\n' + Bcolors.ENDC)
     tests.append('fail')
-    exit(1)
+
+# Test 12 Check -w mode
+print(Bcolors.OKBLUE + '_____Test 12_____' + Bcolors.ENDC)
+print(Bcolors.HEADER + 'Check -w mode' + Bcolors.ENDC)
 try:
-    os.remove(sys.path[0] + '/modeFileTest.wav')
-    print('test.txt removed')
+    try:
+        connection = subprocess.check_call(['ping', '-c', '3', '-t', '3', '8.8.8.8'],
+                                           stdout=subprocess.DEVNULL,
+                                           stderr=subprocess.STDOUT)
+        if connection != 0:
+            raise Exception('Connection to internet failed')
+    except Exception as e:
+        print(e)
+    short_w = urllib.request.urlopen('https://en.wikipedia.org/wiki/Special:ShortPages').read()
+    utf8_w = short_w.decode('utf-8')
+    lis = re.search('<li>(.*?)</li>', utf8_w)
+    first_li = lis.group(0)
+    clean_first_li = re.sub('>.*?</a>', '', first_li)
+    clean_address = clean_first_li.split('"')[3]
+    test = os.system("./dihdah.py -w '" + str(clean_address) + "' -o wiki -rec 1")
+    if test != 0:
+        raise Exception(test)
+    elif not filecmp.cmp(sys.path[0] + '/wiki.wav', sys.path[0] + '/wiki404Test.wav'):
+        try:
+            os.remove(sys.path[0] + '/wiki404Test.wav')
+            print('wiki404Test.wav removed')
+            os.remove(sys.path[0] + '/wiki.wav')
+            print('wiki.wav removed')
+        except Exception as e:
+            print(e)
+        finally:
+            print('There is no (more) wiki404Test.wav nor wiki.wav in the current folder')
+        print(Bcolors.OKGREEN + 'Test 12 passed\n' + Bcolors.ENDC)
+        tests.append('success')
+    else:
+        raise Exception('The two files are equal')
 except Exception as e:
     print(e)
-finally:
-    print('There is no (more) modeFileTest.wav in the current folder')
-try:
-    os.remove(sys.path[0] + '/wiki404Test.wav')
-    print('test.txt removed')
-except Exception as e:
-    print(e)
-finally:
-    print('There is no (more) wiki404Test.wav in the current folder')
+    print(Bcolors.FAIL + 'Failed to pass test 12\n' + Bcolors.ENDC)
+    tests.append('fail')
 
 
 # Tests Summary
@@ -298,10 +332,11 @@ for idx, test in enumerate(tests):
 
 
 # TODO :
-# Check -w
 # Check Noise (may be set random seed) checksum of file essence ffmpeg hash
 # unitary test passing and non passing for all functions
 # Check mutual exclusions
 # Isolate test as function in order to be called as subset of tests from testing library
 # rewrite tests with tries around
+# Suppress All test files after tests are done.
+# Make a function and push file names in a list when they're created
 # And many more

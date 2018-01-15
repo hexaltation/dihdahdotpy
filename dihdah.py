@@ -17,6 +17,7 @@ import subprocess
 import json
 import pyaudio
 import urllib.request
+import urllib.parse
 import wave
 import time
 
@@ -189,7 +190,7 @@ def generate_morse_msg(config):
 def generate_url(list_of_words, language):
     output = 'https://'+language+'.wikipedia.org/wiki/'
     for idx, word in enumerate(list_of_words):
-        output += word.replace(' ', '_').lower()
+        output += urllib.parse.quote_plus(word.replace(' ', '_').lower())
         if len(list_of_words) > 1 and idx < (len(list_of_words)-1):
             output += '_'
     return output
